@@ -14,4 +14,10 @@ function MockWS() {
 
 inherits(MockWS, EventEmitter);
 
+MockWS.prototype.close = function close() {
+};
+
+MockWS.prototype.send = function send() {
+};
+
 module.exports = MockWS;
