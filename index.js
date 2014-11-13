@@ -44,31 +44,88 @@ function ShareJSStream(ws, options) {
 
   Duplex.call(this, { objectMode: true });
 
-  this.ws.on('close',   this.onWsClose.bind(this));
-  this.ws.on('message', this.onWsMessage.bind(this));
+  /**
+   * Send a `null` message to the ws so that the connection is kept alive.
+   *
+   * This may not be necessary on all platforms.
+   *
+   * @method keepAlive
+   * @private
+   */
+  this.keepAlive = function keepAlive() {
+    this.ws.send(null);
+  }.bind(this);
 
-  this.on('error', this.onStreamError.bind(this));
-  this.on('end',   this.onStreamEnd.bind(this));
+  /**
+   * Handle a closed ws client.
+   *
+   * This is called when the `close` event is emitted on the ws client. It:
+   *
+   * - Clears the keep alive interval (if there is one)
+   * - Pushes `null` to end the stream
+   * - Emits `close` on the stream
+   * - Closes the ws client
+   *
+   * @method onWsClose
+   * @private
+   * @param {Number} code the reason code for why the client was closed
+   * @param {String} message a message accompanying the close
+   */
+  this.onWsClose = function onWsClose(code, message) {
+    if (this.keepAliveInterval) {
+      clearInterval(this.keepAliveInterval);
+    }
+
+    this.push(null);
+    this.emit('close');
+    this.ws.close(code, message);
+  }.bind(this);
+
+  /**
+   * Push a message received on the ws client as an object to the stream.
+   *
+   * @method onWsMessage
+   * @private
+   * @param {String} msg a JSON-encoded message received on the ws client
+   */
+  this.onWsMessage = function onWsMessage(msg) {
+    msg = JSON.parse(msg);
+    this.push(msg);
+  }.bind(this);
+
+  /**
+   * Handle the stream ending by closing the ws client connection.
+   *
+   * @method onStreamEnd
+   * @private
+   */
+  this.onStreamEnd = function onStreamEnd() {
+    this.ws.close();
+  }.bind(this);
+
+  /**
+   * Handle a stream error by closing the ws client connection.
+   *
+   * @method onStreamError
+   * @private
+   * @param {Error} err the error emitted on the stream
+   */
+  this.onStreamError = function onStreamError(err) {
+    this.ws.close(err);
+  }.bind(this);
+
+  this.ws.on('close',   this.onWsClose);
+  this.ws.on('message', this.onWsMessage);
+
+  this.on('error', this.onStreamError);
+  this.on('end',   this.onStreamEnd);
 
   if (options.keepAlive) {
-    this.keepAliveInterval = setInterval(this.keepAlive.bind(this),
-                                         options.keepAlive);
+    this.keepAliveInterval = setInterval(this.keepAlive, options.keepAlive);
   }
 }
 
 inherits(ShareJSStream, Duplex);
-
-/**
- * Send a `null` message to the ws so that the connection is kept alive.
- *
- * This may not be necessary on all platforms.
- *
- * @method keepAlive
- * @private
- */
-ShareJSStream.prototype.keepAlive = function keepAlive() {
-  this.ws.send(null);
-};
 
 /**
  * Send a JSON-encoded message to the ws client.
@@ -80,64 +137,6 @@ ShareJSStream.prototype.keepAlive = function keepAlive() {
 ShareJSStream.prototype.messageWsClient = function messageWsClient(msg) {
   msg = JSON.stringify(msg);
   this.ws.send(msg);
-};
-
-/**
- * Handle a closed ws client.
- *
- * This is called when the `close` event is emitted on the ws client. It:
- *
- * - Clears the keep alive interval (if there is one)
- * - Pushes `null` to end the stream
- * - Emits `close` on the stream
- * - Closes the ws client
- *
- * @method onWsClose
- * @private
- * @param {Number} code the reason code for why the client was closed
- * @param {String} message a message accompanying the close
- */
-ShareJSStream.prototype.onWsClose = function onWsClose(code, message) {
-  if (this.keepAliveInterval) {
-    clearInterval(this.keepAliveInterval);
-  }
-
-  this.push(null);
-  this.emit('close');
-  this.ws.close(code, message);
-};
-
-/**
- * Push a message received on the ws client as an object to the stream.
- *
- * @method onWsMessage
- * @private
- * @param {String} msg a JSON-encoded message received on the ws client
- */
-ShareJSStream.prototype.onWsMessage = function onWsMessage(msg) {
-  msg = JSON.parse(msg);
-  this.push(msg);
-};
-
-/**
- * Handle the stream ending by closing the ws client connection.
- *
- * @method onStreamEnd
- * @private
- */
-ShareJSStream.prototype.onStreamEnd = function onStreamEnd() {
-  this.ws.close();
-};
-
-/**
- * Handle a stream error by closing the ws client connection.
- *
- * @method onStreamError
- * @private
- * @param {Error} err the error emitted on the stream
- */
-ShareJSStream.prototype.onStreamError = function onStreamError(err) {
-  this.ws.close(err);
 };
 
 /**
