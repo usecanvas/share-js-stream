@@ -1,0 +1,27 @@
+{
+  "name": "share-js-stream",
+  "version": "1.0.0",
+  "description": "a stream to manage ShareJS <-> WebSocket client communications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/slowink/share-js-stream"
+  },
+  "keywords": [
+    "sharejs",
+    "stream",
+    "websockets"
+  ],
+  "author": "Jonathan Clem",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/slowink/share-js-stream/issues"
+  },
+  "homepage": "https://github.com/slowink/share-js-stream",
+  "devDependencies": {
+    "mocha": "^2.0.1"
+  }
+}
