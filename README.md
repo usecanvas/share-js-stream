@@ -1,4 +1,4 @@
-# ShareJSStream
+# ShareJSStream [![Build Status](https://travis-ci.org/slowink/share-js-stream.svg?branch=master)](https://travis-ci.org/slowink/share-js-stream)
 
 ShareJSStream is a stream that can be used to manage communication between a
 [ShareJS client][sharejs-client] and a [ws connection][ws-conn].
