@@ -120,8 +120,8 @@ function ShareJSStream(ws, options) {
    * @param {Error} err the error emitted on the stream
    */
   this.onStreamError = function onStreamError(err) {
-    this.ws.close(err);
     this.log({ evt: 'streamError', err: err.message });
+    this.ws.close(1008, err.message);
   }.bind(this);
 
   this.ws.on('close',   this.onWsClose);
