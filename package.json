@@ -1,6 +1,6 @@
 {
   "name": "share-js-stream",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a stream to manage ShareJS <-> WebSocket client communications",
   "main": "index.js",
   "scripts": {
