@@ -116,7 +116,7 @@ function ShareJSStream(ws, options) {
    */
   this.onStreamEnd = function onStreamEnd() {
     this.log({ evt: 'streamEnd' });
-    this.ws.close();
+    this.ws.close(1000);
   }.bind(this);
 
   /**
