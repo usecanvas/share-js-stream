@@ -126,7 +126,7 @@ ShareJSStream.prototype.onWsMessage = function onWsMessage(msg) {
  * @private
  */
 ShareJSStream.prototype.onStreamEnd = function onStreamEnd() {
-  this.client.close();
+  this.ws.close();
 };
 
 /**
@@ -137,7 +137,7 @@ ShareJSStream.prototype.onStreamEnd = function onStreamEnd() {
  * @param {Error} err the error emitted on the stream
  */
 ShareJSStream.prototype.onStreamError = function onStreamError(err) {
-  this.client.close(err);
+  this.ws.close(err);
 };
 
 /**
