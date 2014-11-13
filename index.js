@@ -86,7 +86,6 @@ function ShareJSStream(ws, options) {
     this.log({ evt: 'wsClose', code: code, message: message });
     this.push(null);
     this.emit('close');
-    this.ws.close(code, message);
   }.bind(this);
 
   /**
