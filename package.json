@@ -22,8 +22,12 @@
   },
   "homepage": "https://github.com/slowink/share-js-stream",
   "devDependencies": {
+    "express": "^4.10.2",
+    "livedb": "^0.4.9",
     "mocha": "^2.0.1",
+    "share": "^0.7.3",
     "should": "^4.3.0",
-    "sinon": "^1.11.1"
+    "sinon": "^1.11.1",
+    "ws": "^0.4.32"
   }
 }
