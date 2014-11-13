@@ -7,11 +7,13 @@ var inherits   = require('util').inherits;
 /**
  * A Stream for managing communication between a ShareJS client and a ws client
  *
- *     var http          = require('http');
- *     var livedb        = require('livedb');
- *     var share         = require('share');
  *     var ShareJSStream = require('share-js-stream');
  *     var WsServer      = require('ws').Server;
+ *     var http          = require('http');
+ *     var livedb        = require('livedb');
+ *     var shareServer   = require('share').server.createClient({
+ *       backend: livedb.client(livedb.memory()) 
+ *     });
  *
  *     http.createServer().listen(process.env.PORT, function onListen() {
  *       var wsServer = new WsServer({ server: this });
@@ -20,9 +22,7 @@ var inherits   = require('util').inherits;
  *
  *     function onConnection(conn) {
  *       var stream = new ShareJSStream(conn);
- *       share.server
- *         .createClient({ backend: livedb.client(livedb.memory()) })
- *         .listen(stream);
+ *       shareServer.listen(stream);
  *     }
  *
  * @class ShareJSStream

@@ -17,11 +17,13 @@ When a connection is established on a ws server, create a ShareJS server client
 and tell it to listen on a ShareJSStream:
 
 ```javascript
-var http          = require('http');
-var livedb        = require('livedb');
-var share         = require('share');
 var ShareJSStream = require('share-js-stream');
 var WsServer      = require('ws').Server;
+var http          = require('http');
+var livedb        = require('livedb');
+var shareServer   = require('share').server.createClient({
+  backend: livedb.client(livedb.memory()) 
+});
 
 http.createServer().listen(process.env.PORT, function onListen() {
   var wsServer = new WsServer({ server: this });
@@ -30,9 +32,7 @@ http.createServer().listen(process.env.PORT, function onListen() {
 
 function onConnection(conn) {
   var stream = new ShareJSStream(conn);
-  share.server
-    .createClient({ backend: livedb.client(livedb.memory()) })
-    .listen(stream);
+  shareServer.listen(stream);
 }
 ```
 
