@@ -71,7 +71,6 @@ function ShareJSStream(ws, options) {
    * - Clears the keep alive interval (if there is one)
    * - Pushes `null` to end the stream
    * - Emits `close` on the stream
-   * - Closes the ws client
    *
    * @method onWsClose
    * @private
@@ -90,6 +89,9 @@ function ShareJSStream(ws, options) {
 
   /**
    * Push a message received on the ws client as an object to the stream.
+   *
+   * If JSON parsing of the message fails, an error event will be emitted on the
+   * stream.
    *
    * @method onWsMessage
    * @private
@@ -160,8 +162,8 @@ ShareJSStream.prototype.log = function log(msg) {
 /**
  * A no-op read operation for the stream.
  *
- * This is a no-op because _write immediately messages the ws client, rather
- * than pushing the message into a queue.
+ * This is a no-op because _write immediately pushes messages the ws client,
+ * rather than pushing messages into a queue.
  *
  * @method _read
  * @private
