@@ -17,7 +17,7 @@ describe('ShareJSStream', function() {
     messages = [];
     errors   = [];
     ws       = new MockWS();
-    stream   = new ShareJSStream(ws);
+    stream   = new ShareJSStream(ws, { keepAlive: false });
 
     stream.on('data', function onData(data) {
       messages.push(data);
@@ -48,18 +48,20 @@ describe('ShareJSStream', function() {
     });
 
     it('defaults to a 30s keep alive', function() {
+      stream = new ShareJSStream(ws);
       global.setInterval.calledOnce.should.be.true;
       global.setInterval.args[0].should.eql([stream.keepAlive, 30 * 1000]);
     });
 
     it('accepts a keep alive option', function() {
       stream = new ShareJSStream(ws, { keepAlive: 10 * 1000 });
-      global.setInterval.args[1].should.eql([stream.keepAlive, 10 * 1000]);
+      global.setInterval.calledOnce.should.be.true;
+      global.setInterval.args[0].should.eql([stream.keepAlive, 10 * 1000]);
     });
 
     it('accepts a no keep alive option', function() {
       stream = new ShareJSStream(ws, { keepAlive: false });
-      global.setInterval.calledOnce.should.be.true;
+      global.setInterval.called.should.be.false;
     });
   });
 
@@ -79,6 +81,7 @@ describe('ShareJSStream', function() {
   describe('on ws close', function() {
     beforeEach(function() {
       sinon.spy(global, 'clearInterval');
+      stream = new ShareJSStream(ws);
     });
 
     afterEach(function() {
