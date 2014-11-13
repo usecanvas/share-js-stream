@@ -158,18 +158,6 @@ ShareJSStream.prototype.log = function log(msg) {
 };
 
 /**
- * Send a JSON-encoded message to the ws client.
- *
- * @method messageWsClient
- * @private
- * @param {Object} msg the message to send to the client
- */
-ShareJSStream.prototype.messageWsClient = function messageWsClient(msg) {
-  msg = JSON.stringify(msg);
-  this.ws.send(msg);
-};
-
-/**
  * A no-op read operation for the stream.
  *
  * This is a no-op because _write immediately messages the ws client, rather
@@ -183,7 +171,7 @@ ShareJSStream.prototype._read = function _read() {
 };
 
 /**
- * Write a message to the stream.
+ * Write a message to the stream, JSON-encoding it first.
  *
  * @method _write
  * @private
@@ -192,7 +180,8 @@ ShareJSStream.prototype._read = function _read() {
  * @param {Function} cb a callback called when the `msg` is written
  */
 ShareJSStream.prototype._write = function _write(msg, encoding, cb) {
-  this.messageWsClient(msg);
+  msg = JSON.stringify(msg);
+  this.ws.send(msg);
   cb();
 };
 
