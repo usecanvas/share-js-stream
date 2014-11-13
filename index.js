@@ -96,8 +96,15 @@ function ShareJSStream(ws, options) {
    * @param {String} msg a JSON-encoded message received on the ws client
    */
   this.onWsMessage = function onWsMessage(msg) {
-    msg = JSON.parse(msg);
     this.log({ evt: 'wsMessage', msg: msg });
+
+    try {
+      msg = JSON.parse(msg);
+    } catch(err) {
+      this.emit('error', new Error('Client sent invalid JSON'));
+      return;
+    }
+
     this.push(msg);
   }.bind(this);
 
