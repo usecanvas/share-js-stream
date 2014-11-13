@@ -66,13 +66,13 @@ describe('ShareJSStream', function() {
   describe('keep alive', function() {
     it('sends `null` to the ws', function(done) {
       sinon.spy(ws, 'send');
-      stream = new ShareJSStream(ws, { keepAlive: 1 });
+      stream = new ShareJSStream(ws, { keepAlive: 6 });
 
       setTimeout(function() {
         ws.send.calledOnce.should.be.true;
         ws.send.args[0].should.eql([null]);
         done();
-      }, 2);
+      }, 10);
     });
   });
 
