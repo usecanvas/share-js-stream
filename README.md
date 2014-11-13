@@ -36,5 +36,23 @@ function onConnection(conn) {
 }
 ```
 
+## Testing
+
+Run tests:
+
+```sh
+npm test
+```
+
+There is also a sandbox that can be started:
+
+```sh
+node test/sandbox
+```
+
+This will serve a basic ShareJS app (with an in-memory store) on
+`process.env.PORT` or port 5000. Debugging on the ShareJSStream is enabled here,
+so you'll see verbose logging for stream activity in the console.
+
 [sharejs-client]: https://github.com/share/ShareJS
 [ws-conn]: https://github.com/einaros/ws/blob/master/doc/ws.md#class-wswebsocket
