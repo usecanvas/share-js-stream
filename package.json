@@ -4,7 +4,7 @@
   "description": "a stream to manage ShareJS <-> WebSocket client communications",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,8 @@
   },
   "homepage": "https://github.com/slowink/share-js-stream",
   "devDependencies": {
-    "mocha": "^2.0.1"
+    "mocha": "^2.0.1",
+    "should": "^4.3.0",
+    "sinon": "^1.11.1"
   }
 }
