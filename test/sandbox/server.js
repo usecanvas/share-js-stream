@@ -22,6 +22,6 @@ http.createServer(app).listen(port, function onListen() {
 });
 
 function onConnection(conn) {
-  var stream = new ShareJSStream(conn);
+  var stream = new ShareJSStream(conn, { debug: true });
   shareServer.listen(stream);
 }

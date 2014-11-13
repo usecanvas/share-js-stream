@@ -3,6 +3,7 @@
 var KEEP_ALIVE = 30 * 1000;
 var Duplex     = require('stream').Duplex;
 var inherits   = require('util').inherits;
+var logfmt     = require('logfmt');
 
 /**
  * A Stream for managing communication between a ShareJS client and a ws client
@@ -38,9 +39,14 @@ function ShareJSStream(ws, options) {
   options.keepAlive = options.keepAlive !== undefined ?
     options.keepAlive : KEEP_ALIVE;
 
+  this.debug         = options.debug === true;
   this.ws            = ws;
   this.headers       = this.ws.upgradeReq.headers;
   this.remoteAddress = this.ws.upgradeReq.connection.remoteAddress;
+
+  if (this.debug) {
+    this.logger = logfmt.namespace({ ns: 'share-js-stream' });
+  }
 
   Duplex.call(this, { objectMode: true });
 
@@ -53,6 +59,7 @@ function ShareJSStream(ws, options) {
    * @private
    */
   this.keepAlive = function keepAlive() {
+    this.log({ evt: 'keepAlive' });
     this.ws.send(null);
   }.bind(this);
 
@@ -76,6 +83,7 @@ function ShareJSStream(ws, options) {
       clearInterval(this.keepAliveInterval);
     }
 
+    this.log({ evt: 'wsClose', code: code, message: message });
     this.push(null);
     this.emit('close');
     this.ws.close(code, message);
@@ -90,6 +98,7 @@ function ShareJSStream(ws, options) {
    */
   this.onWsMessage = function onWsMessage(msg) {
     msg = JSON.parse(msg);
+    this.log({ evt: 'wsMessage', msg: msg });
     this.push(msg);
   }.bind(this);
 
@@ -100,6 +109,7 @@ function ShareJSStream(ws, options) {
    * @private
    */
   this.onStreamEnd = function onStreamEnd() {
+    this.log({ evt: 'streamEnd' });
     this.ws.close();
   }.bind(this);
 
@@ -112,6 +122,7 @@ function ShareJSStream(ws, options) {
    */
   this.onStreamError = function onStreamError(err) {
     this.ws.close(err);
+    this.log({ evt: 'streamError', err: err.message });
   }.bind(this);
 
   this.ws.on('close',   this.onWsClose);
@@ -126,6 +137,19 @@ function ShareJSStream(ws, options) {
 }
 
 inherits(ShareJSStream, Duplex);
+
+/**
+ * If `debug` is true, log a message.
+ *
+ * @method log
+ * @private
+ * @param {Object} msg the message object to log
+ */
+ShareJSStream.prototype.log = function log(msg) {
+  if (this.debug) {
+    this.logger.log(msg);
+  }
+};
 
 /**
  * Send a JSON-encoded message to the ws client.
