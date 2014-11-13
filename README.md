@@ -13,8 +13,8 @@ npm install share-js-stream
 
 ## Usage
 
-When a connection is established on a ws server, create a ShareJS server client
-and tell it to listen on a ShareJSStream:
+When a connection is established on a ws server, tell a ShareJS server client to
+listen on a ShareJSStream:
 
 ```javascript
 var ShareJSStream = require('share-js-stream');
