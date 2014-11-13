@@ -9,12 +9,23 @@ var sinon         = require('sinon');
 require('should');
 
 describe('ShareJSStream', function() {
-  var ws, stream;
+  var ws, stream, errors, messages;
 
   beforeEach(function() {
     sinon.spy(global, 'setInterval');
-    ws     = new MockWS();
-    stream = new ShareJSStream(ws);
+
+    messages = [];
+    errors   = [];
+    ws       = new MockWS();
+    stream   = new ShareJSStream(ws);
+
+    stream.on('data', function onData(data) {
+      messages.push(data);
+    });
+
+    stream.on('error', function onError(err) {
+      errors.push(err);
+    });
   });
 
   afterEach(function() {
@@ -49,6 +60,101 @@ describe('ShareJSStream', function() {
     it('accepts a no keep alive option', function() {
       stream = new ShareJSStream(ws, { keepAlive: false });
       global.setInterval.calledOnce.should.be.true;
+    });
+  });
+
+  describe('keep alive', function() {
+    it('sends `null` to the ws', function(done) {
+      sinon.spy(ws, 'send');
+      stream = new ShareJSStream(ws, { keepAlive: 1 });
+
+      setTimeout(function() {
+        ws.send.calledOnce.should.be.true;
+        ws.send.args[0].should.eql([null]);
+        done();
+      }, 2);
+    });
+  });
+
+  describe('on ws close', function() {
+    beforeEach(function() {
+      sinon.spy(global, 'clearInterval');
+    });
+
+    afterEach(function() {
+      global.clearInterval.restore();
+    });
+
+    it('clears the keepAlive interval', function() {
+      ws.emit('close');
+      global.clearInterval.calledOnce.should.be.true;
+      global.clearInterval.args[0].should.eql([stream.keepAliveInterval]);
+    });
+
+    it('closes the stream', function (done) {
+      stream.on('close', function() {
+        done();
+      });
+
+      ws.emit('close');
+    });
+  });
+
+  describe('when receiving a valid ws message', function() {
+    beforeEach(function() {
+      ws.emit('message', '{ "foo": "bar" }');
+    });
+
+    it('emits the message', function() {
+      messages.should.eql([{ foo: 'bar' }]);
+    });
+  });
+
+  describe('when receiving an invalid ws message (bad JSON)', function() {
+    beforeEach(function() {
+      sinon.spy(ws, 'close');
+      ws.emit('message', 'Not JSON');
+    });
+
+    it('does not emit the message', function() {
+      messages.should.eql([]);
+    });
+
+    it('emits an error', function() {
+      errors.length.should.eql(1);
+      errors[0].message.should.eql('Client sent invalid JSON');
+    });
+
+    it('closes the ws', function() {
+      ws.close.calledOnce.should.be.true;
+      ws.close.args[0].should.eql([1008, 'Client sent invalid JSON']);
+    });
+  });
+
+  describe('when the stream ends', function() {
+    beforeEach(function() {
+      sinon.spy(ws, 'close');
+      stream.push(null);
+    });
+
+    it('closes the ws normally', function(done) {
+      stream.on('end', function() {
+        ws.close.calledOnce.should.be.true;
+        ws.close.args[0].should.eql([1000]);
+        done();
+      });
+    });
+  });
+
+  describe('when there is a stream error', function() {
+    beforeEach(function() {
+      sinon.spy(ws, 'close');
+      stream.emit('error', new Error('Error message'));
+    });
+
+    it('closes the ws', function() {
+      ws.close.calledOnce.should.be.true;
+      ws.close.args[0].should.eql([1008, 'Error message']);
     });
   });
 });
