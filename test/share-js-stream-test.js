@@ -130,7 +130,7 @@ describe('ShareJSStream', function() {
 
     it('closes the ws', function() {
       ws.close.calledOnce.should.be.true;
-      ws.close.args[0].should.eql([1008, 'Client sent invalid JSON']);
+      ws.close.args[0].should.eql([1003, 'Client sent invalid JSON']);
     });
   });
 

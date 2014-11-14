@@ -1,9 +1,13 @@
 'use strict';
 
-var KEEP_ALIVE = 30 * 1000;
 var Duplex     = require('stream').Duplex;
 var inherits   = require('util').inherits;
 var logfmt     = require('logfmt');
+
+var CLOSE_ERROR = 1008;
+var CLOSE_NORMAL = 1000;
+var CLOSE_UNSUPPORTED = 1003;
+var KEEP_ALIVE = 30 * 1000;
 
 /**
  * A Stream for managing communication between a ShareJS client and a ws client
@@ -102,8 +106,10 @@ function ShareJSStream(ws, options) {
 
     try {
       msg = JSON.parse(msg);
-    } catch(err) {
-      this.emit('error', new Error('Client sent invalid JSON'));
+    } catch(_) {
+      var err = new Error('Client sent invalid JSON');
+      err.code = CLOSE_UNSUPPORTED;
+      this.emit('error', err);
       return;
     }
 
@@ -118,7 +124,7 @@ function ShareJSStream(ws, options) {
    */
   this.onStreamEnd = function onStreamEnd() {
     this.log({ evt: 'streamEnd' });
-    this.ws.close(1000);
+    this.ws.close(CLOSE_NORMAL);
   }.bind(this);
 
   /**
@@ -130,7 +136,7 @@ function ShareJSStream(ws, options) {
    */
   this.onStreamError = function onStreamError(err) {
     this.log({ evt: 'streamError', err: err.message });
-    this.ws.close(1008, err.message);
+    this.ws.close(err.code || CLOSE_ERROR, err.message);
   }.bind(this);
 
   this.ws.on('close',   this.onWsClose);
