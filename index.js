@@ -1,8 +1,8 @@
 'use strict';
 
-var Duplex     = require('stream').Duplex;
-var inherits   = require('util').inherits;
-var logfmt     = require('logfmt');
+var Duplex   = require('stream').Duplex;
+var inherits = require('util').inherits;
+var logfmt   = require('logfmt');
 
 var CLOSE_ERROR = 1008;
 var CLOSE_NORMAL = 1000;
