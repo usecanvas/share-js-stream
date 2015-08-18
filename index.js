@@ -189,7 +189,13 @@ ShareJSStream.prototype._read = function _read() {
  */
 ShareJSStream.prototype._write = function _write(msg, encoding, cb) {
   msg = JSON.stringify(msg);
-  this.ws.send(msg);
+
+  this.ws.send(msg, function onDone(err) {
+    if (err) {
+      this.log({ error: 'Failed to send message to a WebSocket' });
+    }
+  }.bind(this));
+
   cb();
 };
 
